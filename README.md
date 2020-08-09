@@ -14,7 +14,7 @@ $ pip install python-telegram-bot --upgrade
 In the script, change the [line 228](https://github.com/hatam008/khatm-al-quran-bot/blob/f58b367976402988b608877d4d805f6c173055a8/bot.py#L228) with your token gotten 
 from [@BotFather](https://telegram.me/botfather) (described [here](https://core.telegram.org/bots#6-botfather))
 
-You also should add admins id to [line 12](https://github.com/hatam008/khatm-al-quran-bot/blob/f58b367976402988b608877d4d805f6c173055a8/bot.py#L12) in the list. Ids can be found in [UserInfoBot](https://t.me/userinfobot).
+You also should add **admins**' id to [line 12](https://github.com/hatam008/khatm-al-quran-bot/blob/f58b367976402988b608877d4d805f6c173055a8/bot.py#L12) in the list. Ids can be found in [UserInfoBot](https://t.me/userinfobot).
 
 Now run the script :)
 
