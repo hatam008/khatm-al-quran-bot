@@ -9,7 +9,7 @@ logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s
                     level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-LIST_OF_ADMINS = [855649633] # id of admins should be added to this list
+LIST_OF_ADMINS = [] # id of admins should be added to this list
 
 # sychronize decorator
 def synchronized(wrapped):
@@ -54,16 +54,16 @@ def create_keyboard(names): return [[name] for name in names]
 @send_typing
 def start(update,context):
     bot_data_key = context.bot_data
-    if ('khatms' in bot_data_key) & (len(context.bot_data['khatms']) != 0):
-        keyboard = create_keyboard(context.bot_data['khatms'].keys())
-        reply_markup = ReplyKeyboardMarkup(keyboard,resize_keyboard=True)
-        reply_text = "سلام ، به ربات ختم قرآن کریم خوش آمدید. \n از میان ختم های موجود یکی را انتخاب کنید."
-        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text, reply_markup=reply_markup)
-        return CHOOSE
-    else:
-        reply_text = "سلام ، به ربات ختم قرآن کریم خوش آمدید. \n متاسفانه ختمی موجود نیست."
-        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
-        return ConversationHandler.END
+    if 'khatms' in bot_data_key:
+        if len(context.bot_data['khatms']) != 0 :
+            keyboard = create_keyboard(context.bot_data['khatms'].keys())
+            reply_markup = ReplyKeyboardMarkup(keyboard,resize_keyboard=True)
+            reply_text = "سلام ، به ربات ختم قرآن کریم خوش آمدید. \n از میان ختم های موجود یکی را انتخاب کنید."
+            context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text, reply_markup=reply_markup)
+            return CHOOSE
+    reply_text = "سلام ، به ربات ختم قرآن کریم خوش آمدید. \n متاسفانه ختمی موجود نیست."
+    context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
+    return ConversationHandler.END
 
 @send_typing
 def choose(update,context):
