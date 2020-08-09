@@ -20,14 +20,14 @@ Now run the script :)
 
 ## Guide for Admins
 To add a new 'khatm' an admin should send this command to bot :
-```bash
+```
 /add_khatm <a name for khatm>
 ```
 To remove a 'khatm' an admin should send this command to bot :
-```bash
+```
 /delete_khatm <name of the khatm>
 ```
 Admins can also see all khatms and how many pages on each is read by command :
-```bash
+```
 /show_all
 ```
