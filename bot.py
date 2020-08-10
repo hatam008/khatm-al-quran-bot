@@ -27,6 +27,7 @@ def restricted(func):
         user_id = update.effective_user.id
         if user_id not in LIST_OF_ADMINS:
             print("Unauthorized access denied for {}.".format(user_id))
+            context.bot.send_message(chat_id=update.effective_chat.id, text = "Access Denied :(")
             return
         return func(update, context, *args, **kwargs)
     return wrapped
@@ -47,6 +48,9 @@ send_typing = send_action(ChatAction.TYPING)
 
 #Conversation stages
 COUNT, CHOOSE = range(2)
+
+#Admin stages
+_ADMIN_, _ADD_, _REMOVE_ = range(3)
 
 #create keyboard from itrable strings
 def create_keyboard(names): return [[name] for name in names]
@@ -131,7 +135,7 @@ def exit(update,context):
     if 'choice' in user_data:
         del user_data['choice']
     reply_text = "التماس دعا"
-    context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
+    context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text, reply_markup= ReplyKeyboardRemove())
     return ConversationHandler.END
 
 # back function in COUNT stage
@@ -167,39 +171,51 @@ def unknown_count(update,context):
 @send_typing
 @restricted
 def add_khatm(update, context):
-    name = ' '.join(context.args)
+    name = update.message.text
+    if name == "Back" :
+        return admin_back(update,context)
+
     bot_data = context.bot_data
     if 'khatms' in bot_data.keys():
         khatm_data = bot_data['khatms']
         if name in khatm_data.keys():
-            reply_text = "این ختم از قبل ساخته شده است"
+            reply_text = "This khatm already exists!\nTry another time ..."
+            context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
+            return _ADD_
         else:
             khatm_data.update({name :0})
-            reply_text = "ختم با موقیت اضافه شد"
-        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text,reply_markup= ReplyKeyboardRemove())
+            reply_text = "Successfuly added!"
+            context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
+            return admin_back(update,context)
     else:
         bot_data['khatms'] = {name: 0}
-        reply_text = "ختم با موقیت اضافه شد"
-        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text,reply_markup= ReplyKeyboardRemove())
-
+        reply_text = "Successfuly added!"
+        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
+        return admin_back(update,context)
 
 # function that admin delete a khatm
 @send_typing
 @restricted
 def delete_khatm(update,context):
-    name = ' '.join(context.args)
+    name = update.message.text
+    if name == "Back" :
+        return admin_back(update,context)
     bot_data = context.bot_data
     if 'khatms' in bot_data.keys():
         khatm_data = bot_data['khatms']
         if name in khatm_data.keys():
             khatm_data.pop(name)
-            reply_text = "ختم با موفقیت حذف شد"
+            reply_text = "Successfuly removed!"
+            context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
+            return admin_back(update,context)
         else:
-            reply_text = "چنین ختمی وجود ندارد!"
-        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text,reply_markup= ReplyKeyboardRemove())
+            reply_text = "No khatm exist with this name\nSelect One Option Below"
+            context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
+            return _REMOVE_
     else:
-        reply_text = "چنین ختمی وجود ندارد!"
-        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text,reply_markup= ReplyKeyboardRemove())
+        reply_text = "No khatm exist with this name\nSelect One Option Below"
+        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
+        return _REMOVE_
 
 def create_khatms_list(khatm_data):
     reply = ""
@@ -212,20 +228,82 @@ def create_khatms_list(khatm_data):
     return reply
 
 # function to show all khatms to admins
-@send_typing
-@restricted
 def show_all_khatms(update,context):
     bot_data = context.bot_data
     if 'khatms' in bot_data.keys():
         khatm_data = bot_data['khatms']
         reply_text = create_khatms_list(khatm_data)
-        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text,reply_markup= ReplyKeyboardRemove())
+        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
     else:
-        reply_text = "ختمی برای نمایش وجود ندارد"
-        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text,reply_markup= ReplyKeyboardRemove())
+        reply_text = "No khatm added yet"
+        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
+
+@send_typing
+@restricted
+def admin(update, context):
+    reply_text = "Welcome Admin :)\nSelect one option below or /exit"
+    reply_keyboard = [["Add","Remove"],["Show all Khatms\' info"]]
+    reply_markup = ReplyKeyboardMarkup(reply_keyboard,resize_keyboard=True)
+    context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text,reply_markup= reply_markup)
+    return _ADMIN_
+
+@send_typing
+@restricted
+def admin_choose(update, context):
+    text = update.message.text
+    if text == "Add":
+        admin_add_message(update,context)
+        return _ADD_
+    elif text == "Remove":
+        return admin_remove_message(update, context)
+    elif text == "Show all Khatms\' info":
+        show_all_khatms(update,context)
+        return _ADMIN_
+
+def admin_add_message(update,context):
+    reply_text = "Enter a name for the new khatm :"
+    reply_keyboard = [["Back"]]
+    reply_markup = ReplyKeyboardMarkup(reply_keyboard,resize_keyboard=True)
+    context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text,reply_markup= reply_markup)
+
+def admin_remove_message(update, context):
+    return admin_khatm_keyboard(update, context, _REMOVE_)
+    
+def admin_khatm_keyboard(update, context, mode):
+    bot_data_key = context.bot_data
+    if 'khatms' in bot_data_key:
+        if len(context.bot_data['khatms']) != 0 :
+            keyboard = create_keyboard(context.bot_data['khatms'].keys())
+            keyboard.append(["Back"])
+            reply_markup = ReplyKeyboardMarkup(keyboard,resize_keyboard=True)
+            reply_text = "Select a khatm below :"
+            context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text, reply_markup= reply_markup)
+            return mode
+        else :
+            reply_text = "No khatm added yet"
+            context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
+            return admin_back(update, context)
+    else:
+        reply_text = "No khatm added yet"
+        context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text)
+        return admin_back(update, context)
+
+def admin_back(update,context):
+    reply_text = "Select one option below or /exit :"
+    reply_keyboard = [["Add","Remove"],["Show all Khatms\' info"]]
+    reply_markup = ReplyKeyboardMarkup(reply_keyboard,resize_keyboard=True)
+    context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text, reply_markup= reply_markup)
+    return _ADMIN_
+
+@send_typing
+@restricted
+def admin_exit(update, context):
+    reply_text = "See ya soon :)"
+    context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text, reply_markup= ReplyKeyboardRemove())
+    return ConversationHandler.END
 
 def main():
-    token = "your token" # Your bot token should be placed here
+    token = "yor token" # Your bot token should be placed here
     persistent = PicklePersistence("db") # it automaticly will generate a db that contains bot data
     updater = Updater(token= token,use_context= True,persistence=persistent)
     dispacher = updater.dispatcher
@@ -240,14 +318,16 @@ def main():
     )
     dispacher.add_handler(conversation)
 
-    add_khatm_handler = CommandHandler('add_khatm',add_khatm)
-    dispacher.add_handler(add_khatm_handler)
-
-    delete_khatm_handler = CommandHandler('delete_khatm',delete_khatm)
-    dispacher.add_handler(delete_khatm_handler)
-
-    show_all_khatms_handler = CommandHandler('show_all',show_all_khatms)
-    dispacher.add_handler(show_all_khatms_handler)
+    adminConversation = ConversationHandler(
+        entry_points=[CommandHandler('admin',admin)],
+        states={
+            _ADMIN_: [MessageHandler(Filters.regex('^Add|Remove|Show all Khatms\' info$'),admin_choose)],
+            _ADD_: [MessageHandler(Filters.text,add_khatm)],
+            _REMOVE_: [MessageHandler(Filters.text,delete_khatm)]
+        },
+        fallbacks=[CommandHandler('exit',admin_exit)]
+    )
+    dispacher.add_handler(adminConversation)
 
     updater.start_polling()
     updater.idle()
