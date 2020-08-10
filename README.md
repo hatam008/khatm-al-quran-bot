@@ -11,7 +11,7 @@ Use commands below to install vital libraries :
 $ pip install python-telegram-bot --upgrade
 ```
 
-In the script, change the [line 228](https://github.com/hatam008/khatm-al-quran-bot/blob/f58b367976402988b608877d4d805f6c173055a8/bot.py#L228) with your token gotten 
+In the script, change the [line 306](https://github.com/hatam008/khatm-al-quran-bot/blob/f58b367976402988b608877d4d805f6c173055a8/bot.py#L306) with your token gotten 
 from [@BotFather](https://telegram.me/botfather) (described [here](https://core.telegram.org/bots#6-botfather))
 
 You also should add **admins**' id to [line 12](https://github.com/hatam008/khatm-al-quran-bot/blob/f58b367976402988b608877d4d805f6c173055a8/bot.py#L12) in the list. Ids can be found in [UserInfoBot](https://t.me/userinfobot).
@@ -19,15 +19,10 @@ You also should add **admins**' id to [line 12](https://github.com/hatam008/khat
 Now run the script :)
 
 ## Guide for Admins
-To add a new 'khatm' an admin should send this command to bot :
+
+Admins declared in line 12 of the script can access command :
 ```
-/add_khatm <a name for khatm>
+/admin
 ```
-To remove a 'khatm' an admin should send this command to bot :
-```
-/delete_khatm <name of the khatm>
-```
-Admins can also see all khatms and how many pages on each is read by command :
-```
-/show_all
-```
+In admin pannel are three buttons : Add, Remove and Show all khatms' info.
+By tapping on each an admin could access the option.
