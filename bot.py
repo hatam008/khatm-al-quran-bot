@@ -302,6 +302,11 @@ def admin_exit(update, context):
     context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text, reply_markup= ReplyKeyboardRemove())
     return ConversationHandler.END
 
+@send_typing
+def help(update, context):
+    reply_text = "بعد از فرستادن /start از گزینه های موجود در کیبورد به وجود آمده یک ختم را اتنتخاب کنید.\nسپس تعداد صفحه ای که مایل به مطالعه آن هستید را به صورت عددی بین 1 تا 604 وارد کنید. پاسخ به صورت شماره صفحه هایی که باید مطالعه کنید برای شما ارسال خواهد شد."
+    context.bot.send_message(chat_id=update.effective_chat.id, text = reply_text, reply_markup= ReplyKeyboardRemove())
+
 def main():
     token = "yor token" # Your bot token should be placed here
     persistent = PicklePersistence("db") # it automaticly will generate a db that contains bot data
